@@ -32,16 +32,21 @@ class Data
     protected $data = [];
 
     /**
+     * @var Payment|null
+     */
+    private $payment = null;
+
+    /**
      * 构造方法
      * Data constructor.
-     * @param bool $setDefault 是否设置默认值
+     * @param Payment $payment
      */
-    public function __construct($setDefault = true)
+    public function __construct(Payment $payment)
     {
-        if ($setDefault) {
-            $this->setSignType(self::SIGN_TYPE_MD5);
-            $this->setFeeType(self::FEE_TYPE_CNY);
-        }
+        $this->payment = $payment;
+        $this->setAppId($payment->getAppId());
+        $this->setMchId($payment->getMchId());
+        $this->setSignType(self::SIGN_TYPE_MD5);
     }
 
 
@@ -147,13 +152,13 @@ class Data
 
     /**
      * 计算签名，微信官方文档尚未制定HMAC-SHA256签名时使用的key，目前仅支持MD5
-     * @param string $key 商户密钥
      * @return string
      */
-    public function sign($key)
+    public function sign()
     {
         // 清空当前签名
         $this->setSign(null);
+        $key = $this->payment->getKey();
         // 过滤null参数
         $this->data = array_filter($this->data, function ($item) {
             return $item !== null;
@@ -503,6 +508,15 @@ class Data
     }
 
     /**
+     * 获取微信订单号
+     * @return mixed|null
+     */
+    public function getTransactionId()
+    {
+        return isset($this->data['transaction_id']) ? $this->data['transaction_id'] : null;
+    }
+
+    /**
      * 返回data
      * @return array
      */
@@ -511,14 +525,16 @@ class Data
         return $this->data;
     }
 
+
     /**
      * 使用数组初始化
+     * @param Payment $payment
      * @param array $data
      * @return Data
      */
-    public static function initWithArray(array $data)
+    public static function initWithArray(Payment $payment, array $data)
     {
-        $static = new Data();
+        $static = new Data($payment);
         $static->data = $data;
         return $static;
     }

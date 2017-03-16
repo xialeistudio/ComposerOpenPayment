@@ -14,35 +14,56 @@ require __DIR__ . '/../../../vendor/autoload.php';
 
 class PaymentTest extends PHPUnit_Framework_TestCase
 {
+    /**
+     * @var Payment
+     */
+    private $payment;
+
+    protected function setUp()
+    {
+        $this->payment = new Payment(
+            getenv('WX_MCHID'),
+            getenv('WX_KEY'),
+            getenv('WX_APPID'),
+            getenv('WX_APPSECRET')
+        );
+    }
+
+
     public function getOrderId()
     {
         $orderId = md5(uniqid());
-        file_put_contents(__DIR__ . '/orderId.txt', $orderId);
         return $orderId;
+    }
+
+    public function getNonceStr()
+    {
+        return strval(rand(100000, 999999));
     }
 
     public function testPrepay()
     {
-        $payment = new Payment();
-        $data = new Data();
+        $data = new Data($this->payment);
         $orderId = $this->getOrderId();
         $data
-            ->setAppId(getenv('WX_APPID'))
-            ->setMchId(getenv('WX_MCHID'))
             ->setBody('支付测试')
             ->setOutTradeNo($orderId)
             ->setTotalFee(1)
-            ->setTimeStart(date('YmdHis'))
-            ->setTimeExpire(date('YmdHis', 3600 * 2 + time()))
             ->setNotifyUrl(getenv('WX_NOTIFY_URL'))
             ->setTradeType(Data::TRADE_TYPE_NATIVE)
             ->setProductId($orderId)
-            ->setSpbillCreateIp(getenv('LOCAL_ADDR'))
-            ->setNonceStr(strval(rand(100000, 999999)))
-            ->sign(getenv('WX_KEY'));
-        $response = $payment->prepay($data);
+            ->setSpbillCreateIp(getenv('LOCAL_ADDR'));
+        $response = $this->payment->prepay($data);
         $this->assertArrayHasKey('return_code', $response);
-        $this->assertEquals('SUCCESS',$response['return_code']);
-        print_r($response);
+        $this->assertEquals('SUCCESS', $response['return_code']);
+    }
+
+    public function testOrderQuery()
+    {
+        $data = new Data($this->payment);
+        $data->setOutTradeNo('8c7622456b7838a8aa658568eaa76f71');
+        $response = $this->payment->orderQuery($data);
+        $this->assertArrayHasKey('return_code', $response);
+        $this->assertEquals('SUCCESS', $response['return_code']);
     }
 }

@@ -25,6 +25,27 @@ class Payment extends OpenPayment
      */
     const BASE_URL = 'https://api.mch.weixin.qq.com';
 
+    private $mchId;
+    private $key;
+    private $appId;
+    private $appSecret;
+
+    /**
+     * Payment constructor.
+     * @param string $mchId
+     * @param string $key
+     * @param string $appId
+     * @param string $appSecret
+     */
+    public function __construct($mchId, $key, $appId, $appSecret)
+    {
+        $this->mchId = $mchId;
+        $this->key = $key;
+        $this->appId = $appId;
+        $this->appSecret = $appSecret;
+    }
+
+
     /**
      * XML转数组
      * @param string $xml
@@ -59,35 +80,6 @@ class Payment extends OpenPayment
         return $xml;
     }
 
-    /**
-     * 返回渠道名称
-     * @return mixed
-     */
-    public function getChannel()
-    {
-        return OpenPayment::CHANNEL_WECHAT;
-    }
-
-    /**
-     * 统一下单
-     * @param Data $data
-     * @return array
-     */
-    public function prepay(Data $data)
-    {
-        $this->prepayValidate($data);
-        if ($data->getTradeType() === Data::TRADE_TYPE_JSAPI) {
-            $this->prepayValidateWithJsApi($data);
-        }
-        if ($data->getTradeType() === Data::TRADE_TYPE_NATIVE) {
-            $this->prepayValidateWithNative($data);
-        }
-        if ($data->getTradeType() === Data::TRADE_TYPE_APP) {
-            $this->prepayValidateWithApp($data);
-        }
-
-        return $this->prepayRequest($data);
-    }
 
     /**
      * 统一下单参数验证
@@ -158,18 +150,19 @@ class Payment extends OpenPayment
     }
 
     /**
-     * 统一下单请求
+     * 统一HTTP请求
+     * @param $api
      * @param Data $data
      * @return array
      * @throws HttpException
      */
-    private function prepayRequest(Data $data)
+    private function request($api, Data $data)
     {
         $xml = self::array2xml($data->getData());
         $headers = [
             'Content-Type' => 'text/xml'
         ];
-        $resp = \Requests::post(self::BASE_URL . '/pay/unifiedorder', $headers, $xml, $this->httpOptions);
+        $resp = \Requests::post(self::BASE_URL . $api, $headers, $xml, $this->httpOptions);
         if ($resp->status_code !== 200) {
             throw new HttpException($resp->body, $resp->status_code);
         }
@@ -178,5 +171,116 @@ class Payment extends OpenPayment
             return $response;
         }
         return $response;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMchId()
+    {
+        return $this->mchId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getKey()
+    {
+        return $this->key;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAppId()
+    {
+        return $this->appId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAppSecret()
+    {
+        return $this->appSecret;
+    }
+
+    /**
+     * 返回渠道名称
+     * @return mixed
+     */
+    public function getChannel()
+    {
+        return OpenPayment::CHANNEL_WECHAT;
+    }
+
+    /**
+     * 统一下单
+     * @param Data $data
+     * @return array
+     */
+    public function prepay(Data $data)
+    {
+        if ($data->getNonceStr() === null) {
+            $data->setNonceStr($this->getNonceStr());
+        }
+        if ($data->getFeeType() === null) {
+            $data->setFeeType(Data::FEE_TYPE_CNY);
+        }
+        $data->sign();
+        $this->prepayValidate($data);
+        if ($data->getTradeType() === Data::TRADE_TYPE_JSAPI) {
+            $this->prepayValidateWithJsApi($data);
+        }
+        if ($data->getTradeType() === Data::TRADE_TYPE_NATIVE) {
+            $this->prepayValidateWithNative($data);
+        }
+        if ($data->getTradeType() === Data::TRADE_TYPE_APP) {
+            $this->prepayValidateWithApp($data);
+        }
+
+        return $this->request('/pay/unifiedorder', $data);
+    }
+
+    /**
+     * 订单查询
+     * @param Data $data
+     * @return array
+     */
+    public function orderQuery(Data $data)
+    {
+        if ($data->getNonceStr() === null) {
+            $data->setNonceStr($this->getNonceStr());
+        }
+        $data->sign();
+        $this->orderQueryValidate($data);
+        return $this->request('/pay/orderquery', $data);
+    }
+
+    /**
+     * 订单查询验证参数
+     * @param Data $data
+     * @throws InvalidParamException
+     */
+    private function orderQueryValidate(Data $data)
+    {
+        if ($data->getAppId() === null) {
+            throw new InvalidParamException($this->getChannel(), 'AppId未设置');
+        }
+        if ($data->getMchId() === null) {
+            throw new InvalidParamException($this->getChannel(), 'MchId未设置');
+        }
+        if ($data->getSign() === null) {
+            throw new InvalidParamException($this->getChannel(), 'Sign未设置');
+        }
+        if ($data->getSignType() === null) {
+            throw new InvalidParamException($this->getChannel(), 'SignType未设置');
+        }
+        if ($data->getNonceStr() === null) {
+            throw new InvalidParamException($this->getChannel(), 'NonceStr未设置');
+        }
+        if ($data->getTransactionId() === null && $data->getOutTradeNo() === null) {
+            throw new InvalidParamException($this->getChannel(), '商户订单号和微信订单号不能同时为空');
+        }
     }
 }

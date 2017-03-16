@@ -40,4 +40,20 @@ abstract class OpenPayment
     {
         $this->httpOptions = array_merge($this->httpOptions, $httpOptions);
     }
+
+    /**
+     * 随机字符串
+     * @param int $size
+     * @return string
+     */
+    public function getNonceStr($size = 32)
+    {
+        $chars = '1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM';
+        $string = '';
+        $length = strlen($chars);
+        for ($i = 0; $i < $size; $i++) {
+            $string .= $chars[rand(0, $length - 1)];
+        }
+        return $string;
+    }
 }
