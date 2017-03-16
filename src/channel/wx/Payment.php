@@ -45,7 +45,6 @@ class Payment extends OpenPayment
         $this->appSecret = $appSecret;
     }
 
-
     /**
      * @return string
      */
@@ -77,7 +76,6 @@ class Payment extends OpenPayment
     {
         return $this->appSecret;
     }
-
 
     /**
      * XML转数组
@@ -112,7 +110,6 @@ class Payment extends OpenPayment
         $xml .= '</xml>';
         return $xml;
     }
-
 
     /**
      * 统一HTTP请求
