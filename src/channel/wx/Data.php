@@ -32,12 +32,6 @@ class Data
     protected $data = [];
 
     /**
-     * 响应参数
-     * @var array
-     */
-    protected $response = [];
-
-    /**
      * 构造方法
      * Data constructor.
      * @param bool $setDefault 是否设置默认值
@@ -54,10 +48,12 @@ class Data
     /**
      * 设置APPID 微信支付分配的公众账号ID（企业号corpid即为此appId）
      * @param string $appId
+     * @return $this
      */
     public function setAppId($appId)
     {
         $this->data['appid'] = $appId;
+        return $this;
     }
 
     /**
@@ -72,10 +68,12 @@ class Data
     /**
      * 设置商户号 微信支付分配的商户号
      * @param string $mchId
+     * @return $this
      */
     public function setMchId($mchId)
     {
         $this->data['mch_id'] = $mchId;
+        return $this;
     }
 
     /**
@@ -90,10 +88,12 @@ class Data
     /**
      * 设置设备号 可以为终端设备号(门店号或收银设备ID)，PC网页或公众号内支付可以传"WEB"
      * @param string $deviceInfo
+     * @return $this
      */
     public function setDeviceInfo($deviceInfo)
     {
         $this->data['device_info'] = $deviceInfo;
+        return $this;
     }
 
     /**
@@ -108,10 +108,12 @@ class Data
     /**
      * 设置随机字符串 长度要求在32位以内。
      * @param string $nonceStr
+     * @return $this
      */
     public function setNonceStr($nonceStr)
     {
         $this->data['nonce_str'] = $nonceStr;
+        return $this;
     }
 
     /**
@@ -126,10 +128,12 @@ class Data
     /**
      * 设置签名 通过签名算法计算得出的签名值
      * @param string $sign
+     * @return $this
      */
     public function setSign($sign)
     {
         $this->data['sign'] = $sign;
+        return $this;
     }
 
     /**
@@ -144,9 +148,12 @@ class Data
     /**
      * 计算签名，微信官方文档尚未制定HMAC-SHA256签名时使用的key，目前仅支持MD5
      * @param string $key 商户密钥
+     * @return string
      */
     public function sign($key)
     {
+        // 清空当前签名
+        $this->setSign(null);
         // 过滤null参数
         $this->data = array_filter($this->data, function ($item) {
             return $item !== null;
@@ -162,16 +169,19 @@ class Data
         $sign = strtoupper($sign);
         // 设置签名
         $this->setSign($sign);
+        return $sign;
     }
 
     /**
      * 设置签名类型 默认为MD5，支持HMAC-SHA256和MD5。
      * @param string $signType
+     * @return $this
      */
     public function setSignType($signType)
     {
         assert(in_array($signType, [self::SIGN_TYPE_MD5, self::SIGN_TYPE_HMAC_SHA256]), 'sign_type为MD5或HMAC-SHA256');
         $this->data['sign_type'] = $signType;
+        return $this;
     }
 
     /**
@@ -186,10 +196,12 @@ class Data
     /**
      * 设置商品描述
      * @param string $body
+     * @return $this
      */
     public function setBody($body)
     {
         $this->data['body'] = $body;
+        return $this;
     }
 
     /**
@@ -204,10 +216,12 @@ class Data
     /**
      * 设置商品详情 单品优惠字段(暂未上线)
      * @param string $detail
+     * @return $this
      */
     public function setDetail($detail)
     {
         $this->data['detail'] = $detail;
+        return $this;
     }
 
     /**
@@ -222,10 +236,12 @@ class Data
     /**
      * 附加数据 在查询API和支付通知中原样返回，可作为自定义参数使用。
      * @param string $attach
+     * @return $this
      */
     public function setAttach($attach)
     {
         $this->data['attach'] = $attach;
+        return $this;
     }
 
     /**
@@ -240,10 +256,12 @@ class Data
     /**
      * 商户订单号 要求32个字符内、且在同一个商户号下唯一。
      * @param $orderId
+     * @return $this
      */
     public function setOutTradeNo($orderId)
     {
         $this->data['out_trade_no'] = $orderId;
+        return $this;
     }
 
     /**
@@ -259,10 +277,12 @@ class Data
      * 标价币种 符合ISO 4217标准的三位字母代码，默认人民币：CNY
      * @inheritdoc https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=4_2
      * @param string $feeType
+     * @return $this
      */
     public function setFeeType($feeType)
     {
         $this->data['fee_type'] = $feeType;
+        return $this;
     }
 
     /**
@@ -277,11 +297,13 @@ class Data
     /**
      * 设置标价金额
      * @param int $totalFee
+     * @return $this
      */
     public function setTotalFee($totalFee)
     {
         assert(is_int($totalFee) && $totalFee > 0, 'total_fee为正整数');
         $this->data['total_fee'] = $totalFee;
+        return $this;
     }
 
     /**
@@ -296,10 +318,12 @@ class Data
     /**
      * 设置终端IP APP和网页支付提交用户端ip，Native支付填调用微信支付API的机器IP。
      * @param string $ip
+     * @return $this
      */
     public function setSpbillCreateIp($ip)
     {
         $this->data['spbill_create_ip'] = $ip;
+        return $this;
     }
 
     /**
@@ -314,10 +338,12 @@ class Data
     /**
      * 设置交易起始时间 格式为yyyyMMddHHmmss，如2009年12月25日9点10分10秒表示为20091225091010。
      * @param string $timeStart
+     * @return $this
      */
     public function setTimeStart($timeStart)
     {
         $this->data['time_start'] = $timeStart;
+        return $this;
     }
 
     /**
@@ -332,10 +358,12 @@ class Data
     /**
      * 订单失效时间，格式为yyyyMMddHHmmss，如2009年12月27日9点10分10秒表示为20091227091010。
      * @param string $timeExpire
+     * @return $this
      */
     public function setTimeExpire($timeExpire)
     {
         $this->data['time_expire'] = $timeExpire;
+        return $this;
     }
 
     /**
@@ -350,10 +378,12 @@ class Data
     /**
      * 设置商品标记 使用代金券或立减优惠功能时需要的参数
      * @param string $goodsTag
+     * @return $this
      */
     public function setGoodsTag($goodsTag)
     {
         $this->data['goods_tag'] = $goodsTag;
+        return $this;
     }
 
     /**
@@ -368,11 +398,12 @@ class Data
     /**
      * 异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数。
      * @param string $notifyUrl
+     * @return $this
      */
     public function setNotifyUrl($notifyUrl)
     {
-        assert(filter_var($notifyUrl, FILTER_VALIDATE_URL), 'notify_url格式为url');
         $this->data['notify_url'] = $notifyUrl;
+        return $this;
     }
 
     /**
@@ -387,6 +418,7 @@ class Data
     /**
      * 设置交易类型
      * @param string $tradeType
+     * @return $this
      */
     public function setTradeType($tradeType)
     {
@@ -398,6 +430,7 @@ class Data
             ]),
             'trade_type为APP或JSAPI或NATIVE');
         $this->data['trade_type'] = $tradeType;
+        return $this;
     }
 
     /**
@@ -412,10 +445,12 @@ class Data
     /**
      * 设置商品ID 此参数为二维码中包含的商品ID，商户自行定义。
      * @param string $productId
+     * @return $this
      */
     public function setProductId($productId)
     {
         $this->data['product_id'] = $productId;
+        return $this;
     }
 
     /**
@@ -430,10 +465,12 @@ class Data
     /**
      * 指定支付方式，no_credit可限制用户不能使用信用卡支付，传入null时取消设置
      * @param string|null $limitPay
+     * @return $this
      */
     public function setLimitPay($limitPay = 'no_credit')
     {
         $this->data['limit_pay'] = $limitPay;
+        return $this;
     }
 
     /**
@@ -448,9 +485,41 @@ class Data
     /**
      * 用户标识 trade_type=JSAPI时（即公众号支付），此参数必传，此参数为微信用户在商户对应appid下的唯一标识。
      * @param string $openid
+     * @return $this
      */
     public function setOpenid($openid)
     {
         $this->data['openid'] = $openid;
+        return $this;
+    }
+
+    /**
+     * 获取用户OPENID
+     * @return mixed|null
+     */
+    public function getOpenid()
+    {
+        return isset($this->data['openid']) ? $this->data['openid'] : null;
+    }
+
+    /**
+     * 返回data
+     * @return array
+     */
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    /**
+     * 使用数组初始化
+     * @param array $data
+     * @return Data
+     */
+    public static function initWithArray(array $data)
+    {
+        $static = new Data();
+        $static->data = $data;
+        return $static;
     }
 }
