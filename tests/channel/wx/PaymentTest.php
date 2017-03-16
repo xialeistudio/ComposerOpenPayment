@@ -66,4 +66,13 @@ class PaymentTest extends PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('return_code', $response);
         $this->assertEquals('SUCCESS', $response['return_code']);
     }
+
+    public function testOrderClose()
+    {
+        $data = new Data($this->payment);
+        $data->setOutTradeNo('9b4987520d1c0c6fd3a6fb1a88e6764b');
+        $response = $this->payment->closeOrder($data);
+        $this->assertArrayHasKey('return_code', $response);
+        $this->assertEquals('SUCCESS', $response['return_code']);
+    }
 }

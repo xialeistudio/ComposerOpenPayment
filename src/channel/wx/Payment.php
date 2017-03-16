@@ -47,6 +47,39 @@ class Payment extends OpenPayment
 
 
     /**
+     * @return string
+     */
+    public function getMchId()
+    {
+        return $this->mchId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getKey()
+    {
+        return $this->key;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAppId()
+    {
+        return $this->appId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAppSecret()
+    {
+        return $this->appSecret;
+    }
+
+
+    /**
      * XML转数组
      * @param string $xml
      * @return array
@@ -82,11 +115,35 @@ class Payment extends OpenPayment
 
 
     /**
-     * 统一下单参数验证
+     * 统一HTTP请求
+     * @param $api
+     * @param Data $data
+     * @return array
+     * @throws HttpException
+     */
+    private function request($api, Data $data)
+    {
+        $xml = self::array2xml($data->getData());
+        $headers = [
+            'Content-Type' => 'text/xml'
+        ];
+        $resp = \Requests::post(self::BASE_URL . $api, $headers, $xml, $this->httpOptions);
+        if ($resp->status_code !== 200) {
+            throw new HttpException($resp->body, $resp->status_code);
+        }
+        $response = self::xml2array($resp->body);
+        if ($response['return_code'] !== 'SUCCESS') {
+            return $response;
+        }
+        return $response;
+    }
+
+    /**
+     * 必须有的参数验证
      * @param Data $data
      * @throws InvalidParamException
      */
-    private function prepayValidate(Data $data)
+    private function commonValidate(Data $data)
     {
         if ($data->getAppId() === null) {
             throw new InvalidParamException($this->getChannel(), 'AppId未设置');
@@ -97,6 +154,22 @@ class Payment extends OpenPayment
         if ($data->getSign() === null) {
             throw new InvalidParamException($this->getChannel(), 'Sign未设置');
         }
+        if ($data->getSignType() === null) {
+            throw new InvalidParamException($this->getChannel(), 'SignType未设置');
+        }
+        if ($data->getNonceStr() === null) {
+            throw new InvalidParamException($this->getChannel(), 'NonceStr未设置');
+        }
+    }
+
+    /**
+     * 统一下单参数验证
+     * @param Data $data
+     * @throws InvalidParamException
+     */
+    private function prepayValidate(Data $data)
+    {
+        $this->commonValidate($data);
         if ($data->getBody() === null) {
             throw new InvalidParamException($this->getChannel(), 'Body未设置');
         }
@@ -150,62 +223,6 @@ class Payment extends OpenPayment
     }
 
     /**
-     * 统一HTTP请求
-     * @param $api
-     * @param Data $data
-     * @return array
-     * @throws HttpException
-     */
-    private function request($api, Data $data)
-    {
-        $xml = self::array2xml($data->getData());
-        $headers = [
-            'Content-Type' => 'text/xml'
-        ];
-        $resp = \Requests::post(self::BASE_URL . $api, $headers, $xml, $this->httpOptions);
-        if ($resp->status_code !== 200) {
-            throw new HttpException($resp->body, $resp->status_code);
-        }
-        $response = self::xml2array($resp->body);
-        if ($response['return_code'] !== 'SUCCESS') {
-            return $response;
-        }
-        return $response;
-    }
-
-    /**
-     * @return string
-     */
-    public function getMchId()
-    {
-        return $this->mchId;
-    }
-
-    /**
-     * @return string
-     */
-    public function getKey()
-    {
-        return $this->key;
-    }
-
-    /**
-     * @return string
-     */
-    public function getAppId()
-    {
-        return $this->appId;
-    }
-
-    /**
-     * @return string
-     */
-    public function getAppSecret()
-    {
-        return $this->appSecret;
-    }
-
-    /**
      * 返回渠道名称
      * @return mixed
      */
@@ -246,41 +263,37 @@ class Payment extends OpenPayment
      * 订单查询
      * @param Data $data
      * @return array
+     * @throws InvalidParamException
      */
     public function orderQuery(Data $data)
     {
         if ($data->getNonceStr() === null) {
             $data->setNonceStr($this->getNonceStr());
         }
+        if ($data->getTransactionId() === null && $data->getOutTradeNo() === null) {
+            throw new InvalidParamException($this->getChannel(), '商户订单号和微信订单号不能同时为空');
+        }
         $data->sign();
-        $this->orderQueryValidate($data);
+        $this->commonValidate($data);
         return $this->request('/pay/orderquery', $data);
     }
 
     /**
-     * 订单查询验证参数
+     * 关闭订单
      * @param Data $data
+     * @return array
      * @throws InvalidParamException
      */
-    private function orderQueryValidate(Data $data)
+    public function closeOrder(Data $data)
     {
-        if ($data->getAppId() === null) {
-            throw new InvalidParamException($this->getChannel(), 'AppId未设置');
-        }
-        if ($data->getMchId() === null) {
-            throw new InvalidParamException($this->getChannel(), 'MchId未设置');
-        }
-        if ($data->getSign() === null) {
-            throw new InvalidParamException($this->getChannel(), 'Sign未设置');
-        }
-        if ($data->getSignType() === null) {
-            throw new InvalidParamException($this->getChannel(), 'SignType未设置');
-        }
         if ($data->getNonceStr() === null) {
-            throw new InvalidParamException($this->getChannel(), 'NonceStr未设置');
+            $data->setNonceStr($this->getNonceStr());
         }
-        if ($data->getTransactionId() === null && $data->getOutTradeNo() === null) {
-            throw new InvalidParamException($this->getChannel(), '商户订单号和微信订单号不能同时为空');
+        if ($data->getOutTradeNo() === null) {
+            throw new InvalidParamException($this->getChannel(), '商户订单号不能为空');
         }
+        $data->sign();
+        $this->commonValidate($data);
+        return $this->request('/pay/closeorder', $data);
     }
 }
