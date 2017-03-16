@@ -1,0 +1,16 @@
+{
+    "name": "xialeistudio/open-payment",
+    "description": "open payment",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "xialeistudio",
+            "email": "1065890063@qq.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "rmccue/requests": "^1.7"
+    }
+}
