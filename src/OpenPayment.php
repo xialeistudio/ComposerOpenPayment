@@ -11,5 +11,8 @@ namespace payment;
 
 class OpenPayment
 {
-    const VERSION = '1.0.0';
+    // 版本名称
+    const VERSION_NAME = '1.0.0';
+    // 版本号，根据日期更新
+    const VERSION_CODE = 20170316;
 }

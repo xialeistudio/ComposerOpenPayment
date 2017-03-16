@@ -14,6 +14,6 @@ class OpenPaymentTest extends PHPUnit_Framework_TestCase
 {
     public function testVersion()
     {
-        $this->assertEquals('1.0.0', OpenPayment::VERSION);
+        $this->assertEquals('1.0.0', OpenPayment::VERSION_NAME);
     }
 }
