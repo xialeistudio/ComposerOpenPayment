@@ -455,4 +455,27 @@ class Payment extends OpenPayment
         ];
         return static::array2xml($data);
     }
+
+    /**
+     * 获取微信支付参数
+     * @param $prepayId
+     * @return array
+     */
+    public function getJsApiParameters($prepayId)
+    {
+        $time = strval(time());
+        $nonceStr = $this->getNonceStr();
+        $data = [
+            'appId' => $this->appId,
+            'timeStamp' => $time,
+            'nonceStr' => $nonceStr,
+            'package' => "prepay_id={$prepayId}",
+            'signType' => 'MD5'
+        ];
+        $pkg = new Data($this);
+        $pkg->setData($data);
+        $sign = $pkg->sign(false);
+        $data['paySign'] = $sign;
+        return json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
 }

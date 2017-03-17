@@ -173,12 +173,15 @@ class Data
 
     /**
      * 计算签名，微信官方文档尚未制定HMAC-SHA256签名时使用的key，目前仅支持MD5
+     * @param bool $autoSet
      * @return string
      */
-    public function sign()
+    public function sign($autoSet = true)
     {
-        // 清空当前签名
-        $this->setSign(null);
+        if ($autoSet) {
+            // 清空当前签名
+            $this->setSign(null);
+        }
         $key = $this->payment->getKey();
         // 过滤null参数
         $this->data = array_filter($this->data, function ($item) {
@@ -193,8 +196,10 @@ class Data
         $sign = md5($string);
         // 签名大写
         $sign = strtoupper($sign);
-        // 设置签名
-        $this->setSign($sign);
+        if ($autoSet) {
+            // 设置签名
+            $this->setSign($sign);
+        }
         return $sign;
     }
 
@@ -547,6 +552,17 @@ class Data
     }
 
     /**
+     * 设置Data
+     * @param array $data
+     * @return $this
+     */
+    public function setData(array $data)
+    {
+        $this->data = $data;
+        return $this;
+    }
+
+    /**
      * 设置商户退款单号
      * @param string $outRefundNo
      * @return $this
@@ -729,5 +745,65 @@ class Data
     public function getTarType()
     {
         return isset($this->data['tar_type']) ? $this->data['tar_type'] : null;
+    }
+
+    /**
+     * JSAPI设置timestamp
+     * @param int $timestamp
+     * @return $this
+     */
+    public function setTimestamp($timestamp)
+    {
+        $this->data['timeStamp'] = $timestamp;
+        return $this;
+    }
+
+    /**
+     * JSAPI获取timestamp
+     * @return mixed|null
+     */
+    public function getTimestamp()
+    {
+        return isset($this->data['timeStamp']) ? $this->data['timeStamp'] : null;
+    }
+
+    /**
+     * 设置订单详情扩展字符串
+     * @param string $package
+     * @return $this
+     */
+    public function setPackage($package)
+    {
+        $this->data['package'] = $package;
+        return $this;
+    }
+
+    /**
+     * 订单详情扩展字符串
+     * @return mixed|null
+     */
+    public function getPackage()
+    {
+        return isset($this->data['package']) ? $this->data['package'] : null;
+    }
+
+    /**
+     * JSAPI设置paySign
+     * @param string $sign
+     * @return $this
+     */
+    public function setPaySign($sign)
+    {
+        $this->data['paySign'] = $sign;
+        return $this;
+    }
+
+    /**
+     * JSAPI获取paySign
+     * @return mixed|null
+     */
+    public function getPaySign()
+    {
+        return isset($this->data['paySign']) ? $this->data['paySign'] : null;
     }
 }

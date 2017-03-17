@@ -15,6 +15,7 @@
     + 查询退款
     + 下载对账单
     + 支付结果通知
+    + JSAPI支付
 
 ## 接入文档
 ### 微信支付
@@ -101,4 +102,21 @@
 <?php
         $xml = $this->payment->getReply('SUCCESS', 'OK');
         echo $xml;
+```
++ JSAPI支付
+```php
+<?php
+            $data = new Data($this->payment);
+            $orderId = $this->getOrderId();
+            $data
+                ->setBody('支付测试')
+                ->setOutTradeNo($orderId)
+                ->setTotalFee(1)
+                ->setNotifyUrl(getenv('WX_NOTIFY_URL'))
+                ->setTradeType(Data::TRADE_TYPE_JSAPI)
+                ->setProductId($orderId)
+                ->setSpbillCreateIp(getenv('LOCAL_ADDR'));
+            $response = $this->payment->prepay($data);
+            $json = $this->payment->getJsApiParameters($response['prepay_id']);
+            // JSON可以直接调用微信JSAPI支付
 ```

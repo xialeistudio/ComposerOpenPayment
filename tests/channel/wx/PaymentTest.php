@@ -50,14 +50,15 @@ class PaymentTest extends PHPUnit_Framework_TestCase
             ->setOutTradeNo($orderId)
             ->setTotalFee(1)
             ->setNotifyUrl(getenv('WX_NOTIFY_URL'))
-            ->setTradeType(Data::TRADE_TYPE_NATIVE)
-            ->setProductId($orderId)
+            ->setTradeType(Data::TRADE_TYPE_JSAPI)
+            ->setOpenid('oHAf2ty7K_mvrpFI3ugvr9Y-ipvA')
             ->setSpbillCreateIp(getenv('LOCAL_ADDR'));
         $response = $this->payment->prepay($data);
         $this->assertArrayHasKey('return_code', $response);
         $this->assertEquals('SUCCESS', $response['return_code']);
         echo '统一下单' . PHP_EOL;
         print_r($response);
+        return $response;
     }
 
     public function testOrderQuery()
@@ -126,5 +127,15 @@ class PaymentTest extends PHPUnit_Framework_TestCase
         $xml = $this->payment->getReply('参数错误', 'FAIL');
         $this->assertEquals('<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[参数错误]]></return_msg></xml>', $xml);
         echo '微信异步回调通知回复' . PHP_EOL;
+    }
+
+    /**
+     * @depends testPrepay
+     * @param array $prepay
+     */
+    public function testGetJsApiParameters(array $prepay)
+    {
+        $response = $this->payment->getJsApiParameters($prepay['prepay_id']);
+        echo $response;
     }
 }
