@@ -28,6 +28,10 @@ class Data
     // 退款资金来源
     const REFUND_SOURCE_UNSETTLED_FUNDS = 'REFUND_SOURCE_UNSETTLED_FUNDS';//未结算资金，默认使用
     const REFUND_SOURCE_RECHARGE_FUNDS = 'REFUND_SOURCE_RECHARGE_FUNDS';// 可用余额退款
+    // 账单类型
+    const BILL_TYPE_ALL = 'ALL';
+    const BILL_TYPE_REFUND = 'REFUND';
+    const RECHARGE_REFUND = 'RECHARGE_REFUND';
     /**
      * 请求参数
      * @var array
@@ -650,10 +654,12 @@ class Data
     /**
      * 设置微信退款单号
      * @param string $id
+     * @return $this
      */
     public function setRefundId($id)
     {
         $this->data['refund_id'] = $id;
+        return $this;
     }
 
     /**
@@ -663,5 +669,65 @@ class Data
     public function getRefundId()
     {
         return isset($this->data['refund_id']) ? $this->data['refund_id'] : null;
+    }
+
+    /**
+     * 设置对账单日期 格式:20140603
+     * @param string $billDate
+     * @return $this
+     */
+    public function setBillDate($billDate)
+    {
+        $this->data['bill_date'] = $billDate;
+        return $this;
+    }
+
+    /**
+     * 获取对账单日期
+     * @return mixed|null
+     */
+    public function getBillDate()
+    {
+        return isset($this->data['bill_date']) ? $this->data['bill_date'] : null;
+    }
+
+    /**
+     * 账单类型
+     * @param string $type
+     * @return $this
+     */
+    public function setBillType($type)
+    {
+        $this->data['bill_type'] = $type;
+        return $this;
+    }
+
+    /**
+     * 获取账单类型
+     * @return mixed|null
+     */
+    public function getBillType()
+    {
+        return isset($this->data['bill_type']) ? $this->data['bill_type'] : null;
+    }
+
+    /**
+     * 压缩账单 非必传参数，固定值：GZIP，返回格式为.gzip的压缩包账单。不传则默认为数据流形式。
+     * @param string $type
+     * @return $this
+     */
+    public function setTarType($type = 'GZIP')
+    {
+        $this->data['tar_type'] = $type;
+        return $this;
+    }
+
+    /**
+     * 获取压缩账单类型
+     * @return mixed|null
+     */
+    public function getTarType()
+    {
+        return isset($this->data['tar_type']) ? $this->data['tar_type'] : null;
     }
 }

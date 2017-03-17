@@ -146,7 +146,7 @@ class Payment extends OpenPayment
      * @param $api
      * @param Data $data
      * @param array $options
-     * @return array
+     * @return array|mixed
      * @throws HttpException
      */
     private function request($api, Data $data, array $options = [])
@@ -154,10 +154,14 @@ class Payment extends OpenPayment
         $options = array_merge(['ssl_ca' => $this->caFile], $options);
         $xml = self::array2xml($data->getData());
         $data = $this->postRequests(self::BASE_URL . $api, $xml, $options);
-        $response = self::xml2array($data);
-        if ($response['return_code'] !== 'SUCCESS') {
+        if (isset($options['raw']) && $options['raw'] === true) {
+            if (strpos($data, '<') !== 0) {
+                return $data;
+            }
+            $response = self::xml2array($data);
             return $response;
         }
+        $response = self::xml2array($data);
         return $response;
     }
 
@@ -383,5 +387,33 @@ class Payment extends OpenPayment
         $data->sign();
         $this->commonValidate($data);
         return $this->request('/pay/refundquery', $data);
+    }
+
+    /**
+     * 下载对账单
+     * @param Data $data
+     * @param bool $gzip
+     * @return array
+     * @throws InvalidParamException
+     */
+    public function downloadBill(Data $data, $gzip = true)
+    {
+        if ($data->getNonceStr() === null) {
+            $data->setNonceStr($this->getNonceStr());
+        }
+        if ($data->getBillType() === null) {
+            $data->setBillType(Data::BILL_TYPE_ALL);
+        }
+        if ($gzip === true) {
+            $data->setTarType();
+        }
+        if ($data->getBillDate() === null) {
+            throw new InvalidParamException($this->getChannel(), '对账日期不能为空');
+        }
+        $data->sign();
+        $this->commonValidate($data);
+        return $this->request('/pay/downloadbill', $data, [
+            'raw' => true,
+        ]);
     }
 }

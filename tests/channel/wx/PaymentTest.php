@@ -106,4 +106,12 @@ class PaymentTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('SUCCESS', $response['return_code']);
         print_r($response);
     }
+
+    public function testDownloadBill()
+    {
+        $data = new Data($this->payment);
+        $data->setBillDate('20170315');
+        $response = $this->payment->downloadBill($data);
+        file_put_contents(__DIR__ . '/bill.tar.gz', $response, FILE_BINARY);
+    }
 }

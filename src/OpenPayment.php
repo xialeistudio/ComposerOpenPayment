@@ -73,6 +73,11 @@ abstract class OpenPayment
         $options = array_merge($defaultOptions, $options);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_TIMEOUT, $options['timeout']);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        if (isset($options['encoding'])) {
+            curl_setopt($ch, CURLOPT_ENCODING, $options['encoding']);
+        }
         // 代理
         if (isset($options['proxy'])) {
             $proxy = explode(':', $options['proxy']);
@@ -87,9 +92,6 @@ abstract class OpenPayment
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, TRUE);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);//严格校验
-
-        curl_setopt($ch, CURLOPT_HEADER, false);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         // 双向SSL
         if (isset($options['ssl_cert'])) {
             curl_setopt($ch, CURLOPT_SSLCERTTYPE, 'PEM');
