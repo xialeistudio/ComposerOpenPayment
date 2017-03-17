@@ -56,6 +56,7 @@ class PaymentTest extends PHPUnit_Framework_TestCase
         $response = $this->payment->prepay($data);
         $this->assertArrayHasKey('return_code', $response);
         $this->assertEquals('SUCCESS', $response['return_code']);
+        echo '统一下单' . PHP_EOL;
         print_r($response);
     }
 
@@ -66,6 +67,7 @@ class PaymentTest extends PHPUnit_Framework_TestCase
         $response = $this->payment->orderQuery($data);
         $this->assertArrayHasKey('return_code', $response);
         $this->assertEquals('SUCCESS', $response['return_code']);
+        echo '订单查询' . PHP_EOL;
         print_r($response);
     }
 
@@ -76,6 +78,7 @@ class PaymentTest extends PHPUnit_Framework_TestCase
         $response = $this->payment->closeOrder($data);
         $this->assertArrayHasKey('return_code', $response);
         $this->assertEquals('SUCCESS', $response['return_code']);
+        echo '关闭订单' . PHP_EOL;
         print_r($response);
     }
 
@@ -94,6 +97,7 @@ class PaymentTest extends PHPUnit_Framework_TestCase
         $response = $this->payment->refund($data);
         $this->assertArrayHasKey('return_code', $response);
         $this->assertEquals('SUCCESS', $response['return_code']);
+        echo '申请退款' . PHP_EOL;
         print_r($response);
     }
 
@@ -104,6 +108,7 @@ class PaymentTest extends PHPUnit_Framework_TestCase
         $response = $this->payment->queryRefund($data);
         $this->assertArrayHasKey('return_code', $response);
         $this->assertEquals('SUCCESS', $response['return_code']);
+        echo '查询退款' . PHP_EOL;
         print_r($response);
     }
 
@@ -112,6 +117,7 @@ class PaymentTest extends PHPUnit_Framework_TestCase
         $data = new Data($this->payment);
         $data->setBillDate('20170315');
         $response = $this->payment->downloadBill($data);
+        echo '下载对账单' . PHP_EOL;
         file_put_contents(__DIR__ . '/bill.tar.gz', $response, FILE_BINARY);
     }
 
@@ -119,5 +125,6 @@ class PaymentTest extends PHPUnit_Framework_TestCase
     {
         $xml = $this->payment->getReply('参数错误', 'FAIL');
         $this->assertEquals('<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[参数错误]]></return_msg></xml>', $xml);
+        echo '微信异步回调通知回复' . PHP_EOL;
     }
 }

@@ -3,14 +3,8 @@
 
 ## 单元测试
 ### 微信支付
-在命令行配置环境变量：
-+ WX_APPID 微信支付APPID
-+ WX_MCHID 微信支付商户号
-+ WX_KEY 微信支付商户密钥
-+ LOCAL_ADDR 服务器IP
-+ WX_NOTIFY_URL 异步通知URL
-
 ***需要使用双向证书的接口，请将微信提供的apiclient_key.pem和apiclient_cert.pem文件放入tests/channel/wx目录下再运行测试***
+打开***test.bat或test.sh***按要求设置变量，然后运行对应的脚本即可
 
 ## 支持平台
 + 微信支付
