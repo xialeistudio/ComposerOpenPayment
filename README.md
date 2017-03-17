@@ -4,7 +4,7 @@
 ## 单元测试
 ### 微信支付
 ***需要使用双向证书的接口，请将微信提供的apiclient_key.pem和apiclient_cert.pem文件放入tests/channel/wx目录下再运行测试***
-打开***test.bat或test.sh***按要求设置变量，然后运行对应的脚本即可
+打开 ***test.bat或test.sh*** 按要求设置变量，然后运行对应的脚本即可
 
 ## 支持平台
 + 微信支付
