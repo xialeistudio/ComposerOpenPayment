@@ -114,4 +114,10 @@ class PaymentTest extends PHPUnit_Framework_TestCase
         $response = $this->payment->downloadBill($data);
         file_put_contents(__DIR__ . '/bill.tar.gz', $response, FILE_BINARY);
     }
+
+    public function testGetReply()
+    {
+        $xml = $this->payment->getReply('参数错误', 'FAIL');
+        $this->assertEquals('<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[参数错误]]></return_msg></xml>', $xml);
+    }
 }

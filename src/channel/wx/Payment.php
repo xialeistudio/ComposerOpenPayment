@@ -9,7 +9,6 @@
 namespace payment\channel\wx;
 
 
-use payment\exception\HttpException;
 use payment\exception\InvalidParamException;
 use payment\exception\SignInvalidException;
 use payment\OpenPayment;
@@ -30,16 +29,25 @@ class Payment extends OpenPayment
     private $key;
     private $appId;
     private $appSecret;
+    /**
+     * @var string key文件路径
+     */
     private $keyFile;
+    /**
+     * @var string cert文件路径
+     */
     private $certFile;
+    /**
+     * @var string ca文件路径
+     */
     private $caFile;
 
     /**
      * Payment constructor.
-     * @param string $mchId
-     * @param string $key
-     * @param string $appId
-     * @param string $appSecret
+     * @param string $mchId 商户号
+     * @param string $key 商户密钥
+     * @param string $appId APPID
+     * @param string $appSecret APP Secret
      */
     public function __construct($mchId, $key, $appId, $appSecret)
     {
@@ -161,8 +169,7 @@ class Payment extends OpenPayment
         $response = self::xml2array($data);
         // 签名验证
         $data = Data::initWithArray($this, $response);
-        $sign = $data->getSign();
-        if ($data->sign() !== $sign) {
+        if ($data->getSign() !== $data->sign()) {
             throw new SignInvalidException($this->getChannel(), '签名错误');
         }
         return $response;
@@ -418,5 +425,34 @@ class Payment extends OpenPayment
         return $this->request('/pay/downloadbill', $data, [
             'raw' => true,
         ]);
+    }
+
+    /**
+     * 检测XML文件签名
+     * @param string $xml
+     * @throws SignInvalidException
+     */
+    public function validateSign($xml)
+    {
+        $array = static::xml2array($xml);
+        $data = Data::initWithArray($this, $array);
+        if ($data->getSign() !== $data->sign()) {
+            throw new SignInvalidException($this->getChannel(), '签名错误');
+        }
+    }
+
+    /**
+     * 获取XML
+     * @param string $message 返回信息，如非空，为错误原因：如签名失败，参数格式校验错误
+     * @param string $code SUCCESS/FAIL
+     * @return string
+     */
+    public function getReply($message, $code)
+    {
+        $data = [
+            'return_code' => $code,
+            'return_msg' => $message
+        ];
+        return static::array2xml($data);
     }
 }
