@@ -46,6 +46,8 @@ class Payment extends OpenPayment
         $this->key = $key;
         $this->appId = $appId;
         $this->appSecret = $appSecret;
+
+        $this->caFile = __DIR__ . '/../cert/cacert.pem';
     }
 
     /**
@@ -149,6 +151,7 @@ class Payment extends OpenPayment
      */
     private function request($api, Data $data, array $options = [])
     {
+        $options = array_merge(['ssl_ca' => $this->caFile], $options);
         $xml = self::array2xml($data->getData());
         $data = $this->postRequests(self::BASE_URL . $api, $xml, $options);
         $response = self::xml2array($data);
@@ -316,6 +319,12 @@ class Payment extends OpenPayment
         return $this->request('/pay/closeorder', $data);
     }
 
+    /**
+     * 退款
+     * @param Data $data
+     * @return array
+     * @throws InvalidParamException
+     */
     public function refund(Data $data)
     {
         if ($data->getNonceStr() === null) {
@@ -348,7 +357,8 @@ class Payment extends OpenPayment
         $data->sign();
         $this->commonValidate($data);
         return $this->request('/secapi/pay/refund', $data, [
-            'verify' => $this->caFile
+            'ssl_key' => $this->keyFile,
+            'ssl_cert' => $this->certFile,
         ]);
     }
 }

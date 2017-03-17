@@ -78,4 +78,22 @@ class PaymentTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('SUCCESS', $response['return_code']);
         print_r($response);
     }
+
+    public function testRefund()
+    {
+        $outRefundNo = $this->getOrderId();
+        file_put_contents(__DIR__ . '/out_refund_no.txt', $outRefundNo);
+        $this->payment->setCertFile(__DIR__ . '/apiclient_cert.pem');
+        $this->payment->setKeyFile(__DIR__ . '/apiclient_key.pem');
+        $data = new Data($this->payment);
+        $data
+            ->setOutTradeNo('8c7622456b7838a8aa658568eaa76f71')
+            ->setTotalFee(1)
+            ->setRefundFee(1)
+            ->setOutRefundNo($outRefundNo);
+        $response = $this->payment->refund($data);
+        $this->assertArrayHasKey('return_code', $response);
+        $this->assertEquals('SUCCESS', $response['return_code']);
+        print_r($response);
+    }
 }

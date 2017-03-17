@@ -69,7 +69,6 @@ abstract class OpenPayment
     {
         $defaultOptions = [
             'timeout' => 30,
-            'ssl_ca' => __DIR__ . '/cert/cacert.pem',
         ];
         $options = array_merge($defaultOptions, $options);
         $ch = curl_init();
