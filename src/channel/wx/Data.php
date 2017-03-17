@@ -646,4 +646,22 @@ class Data
     {
         return isset($this->data['refund_account']) ? $this->data['refund_account'] : null;
     }
+
+    /**
+     * 设置微信退款单号
+     * @param string $id
+     */
+    public function setRefundId($id)
+    {
+        $this->data['refund_id'] = $id;
+    }
+
+    /**
+     * 获取微信退款单号
+     * @return mixed|null
+     */
+    public function getRefundId()
+    {
+        return isset($this->data['refund_id']) ? $this->data['refund_id'] : null;
+    }
 }

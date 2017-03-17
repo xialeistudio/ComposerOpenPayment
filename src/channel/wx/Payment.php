@@ -361,4 +361,27 @@ class Payment extends OpenPayment
             'ssl_cert' => $this->certFile,
         ]);
     }
+
+    /**
+     * 查询退款
+     * @param Data $data
+     * @return array
+     * @throws InvalidParamException
+     */
+    public function queryRefund(Data $data)
+    {
+        if ($data->getNonceStr() === null) {
+            $data->setNonceStr($this->getNonceStr());
+        }
+        if ($data->getTransactionId() === null
+            && $data->getOutTradeNo() === null
+            && $data->getRefundId() === null
+            && $data->getOutRefundNo() === null
+        ) {
+            throw new InvalidParamException($this->getChannel(), '商户订单号、微信订单号、商户退款单号和微信退款单号不能同时为空');
+        }
+        $data->sign();
+        $this->commonValidate($data);
+        return $this->request('/pay/refundquery', $data);
+    }
 }

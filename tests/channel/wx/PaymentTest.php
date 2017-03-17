@@ -96,4 +96,14 @@ class PaymentTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('SUCCESS', $response['return_code']);
         print_r($response);
     }
+
+    public function testQueryRefund()
+    {
+        $data = new Data($this->payment);
+        $data->setOutTradeNo('8c7622456b7838a8aa658568eaa76f71');
+        $response = $this->payment->queryRefund($data);
+        $this->assertArrayHasKey('return_code', $response);
+        $this->assertEquals('SUCCESS', $response['return_code']);
+        print_r($response);
+    }
 }
