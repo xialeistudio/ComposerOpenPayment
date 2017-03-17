@@ -11,6 +11,7 @@ namespace payment\channel\wx;
 
 use payment\exception\HttpException;
 use payment\exception\InvalidParamException;
+use payment\exception\SignInvalidException;
 use payment\OpenPayment;
 
 /**
@@ -147,21 +148,23 @@ class Payment extends OpenPayment
      * @param Data $data
      * @param array $options
      * @return array|mixed
-     * @throws HttpException
+     * @throws SignInvalidException
      */
     private function request($api, Data $data, array $options = [])
     {
         $options = array_merge(['ssl_ca' => $this->caFile], $options);
         $xml = self::array2xml($data->getData());
         $data = $this->postRequests(self::BASE_URL . $api, $xml, $options);
-        if (isset($options['raw']) && $options['raw'] === true) {
-            if (strpos($data, '<') !== 0) {
-                return $data;
-            }
-            $response = self::xml2array($data);
-            return $response;
+        if (isset($options['raw']) && $options['raw'] === true && strpos($data, '<') !== 0) {
+            return $data;
         }
         $response = self::xml2array($data);
+        // 签名验证
+        $data = Data::initWithArray($this, $response);
+        $sign = $data->getSign();
+        if ($data->sign() !== $sign) {
+            throw new SignInvalidException($this->getChannel(), '签名错误');
+        }
         return $response;
     }
 
