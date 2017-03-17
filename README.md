@@ -1,5 +1,5 @@
-#OpenPayment
-Payment Library
+# OpenPayment
+国内主流支付平台库
 
 ## 单元测试
 ### 微信支付
