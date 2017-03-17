@@ -56,6 +56,7 @@ class PaymentTest extends PHPUnit_Framework_TestCase
         $response = $this->payment->prepay($data);
         $this->assertArrayHasKey('return_code', $response);
         $this->assertEquals('SUCCESS', $response['return_code']);
+        print_r($response);
     }
 
     public function testOrderQuery()
@@ -65,6 +66,7 @@ class PaymentTest extends PHPUnit_Framework_TestCase
         $response = $this->payment->orderQuery($data);
         $this->assertArrayHasKey('return_code', $response);
         $this->assertEquals('SUCCESS', $response['return_code']);
+        print_r($response);
     }
 
     public function testOrderClose()
@@ -74,5 +76,6 @@ class PaymentTest extends PHPUnit_Framework_TestCase
         $response = $this->payment->closeOrder($data);
         $this->assertArrayHasKey('return_code', $response);
         $this->assertEquals('SUCCESS', $response['return_code']);
+        print_r($response);
     }
 }

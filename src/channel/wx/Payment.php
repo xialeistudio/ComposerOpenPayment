@@ -29,6 +29,9 @@ class Payment extends OpenPayment
     private $key;
     private $appId;
     private $appSecret;
+    private $keyFile;
+    private $certFile;
+    private $caFile;
 
     /**
      * Payment constructor.
@@ -44,6 +47,31 @@ class Payment extends OpenPayment
         $this->appId = $appId;
         $this->appSecret = $appSecret;
     }
+
+    /**
+     * @param mixed $keyFile
+     */
+    public function setKeyFile($keyFile)
+    {
+        $this->keyFile = $keyFile;
+    }
+
+    /**
+     * @param mixed $certFile
+     */
+    public function setCertFile($certFile)
+    {
+        $this->certFile = $certFile;
+    }
+
+    /**
+     * @param mixed $caFile
+     */
+    public function setCaFile($caFile)
+    {
+        $this->caFile = $caFile;
+    }
+
 
     /**
      * @return string
@@ -115,20 +143,15 @@ class Payment extends OpenPayment
      * 统一HTTP请求
      * @param $api
      * @param Data $data
+     * @param array $options
      * @return array
      * @throws HttpException
      */
-    private function request($api, Data $data)
+    private function request($api, Data $data, array $options = [])
     {
         $xml = self::array2xml($data->getData());
-        $headers = [
-            'Content-Type' => 'text/xml'
-        ];
-        $resp = \Requests::post(self::BASE_URL . $api, $headers, $xml, $this->httpOptions);
-        if ($resp->status_code !== 200) {
-            throw new HttpException($resp->body, $resp->status_code);
-        }
-        $response = self::xml2array($resp->body);
+        $data = $this->postRequests(self::BASE_URL . $api, $xml, $options);
+        $response = self::xml2array($data);
         if ($response['return_code'] !== 'SUCCESS') {
             return $response;
         }
@@ -252,7 +275,6 @@ class Payment extends OpenPayment
         if ($data->getTradeType() === Data::TRADE_TYPE_APP) {
             $this->prepayValidateWithApp($data);
         }
-
         return $this->request('/pay/unifiedorder', $data);
     }
 
@@ -292,5 +314,41 @@ class Payment extends OpenPayment
         $data->sign();
         $this->commonValidate($data);
         return $this->request('/pay/closeorder', $data);
+    }
+
+    public function refund(Data $data)
+    {
+        if ($data->getNonceStr() === null) {
+            $data->setNonceStr($this->getNonceStr());
+        }
+        if ($data->getRefundFeeType() === null) {
+            $data->setRefundFeeType(Data::FEE_TYPE_CNY);
+        }
+        if ($data->getOpUserId() === null) {
+            $data->setOpUserId();
+        }
+        if ($data->getRefundAccount() === null) {
+            $data->setRefundAccount(Data::REFUND_SOURCE_UNSETTLED_FUNDS);
+        }
+        if ($data->getTransactionId() === null && $data->getOutTradeNo() === null) {
+            throw new InvalidParamException($this->getChannel(), '商户订单号和微信订单号不能同时为空');
+        }
+        if ($data->getOutRefundNo() === null) {
+            throw new InvalidParamException($this->getChannel(), '商户退款单号不能为空');
+        }
+        if ($data->getTotalFee() === null) {
+            throw new InvalidParamException($this->getChannel(), 'TotalFee未设置');
+        }
+        if ($data->getRefundFee() === null) {
+            throw new InvalidParamException($this->getChannel(), 'RefundFee未设置');
+        }
+        if (empty($this->certFile) || empty($this->caFile) || empty($this->keyFile)) {
+            throw new InvalidParamException($this->getChannel(), '证书未设置');
+        }
+        $data->sign();
+        $this->commonValidate($data);
+        return $this->request('/secapi/pay/refund', $data, [
+            'verify' => $this->caFile
+        ]);
     }
 }

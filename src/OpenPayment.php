@@ -8,6 +8,8 @@
 
 namespace payment;
 
+use payment\exception\HttpException;
+
 /**
  * 支付
  * Class OpenPayment
@@ -55,5 +57,96 @@ abstract class OpenPayment
             $string .= $chars[rand(0, $length - 1)];
         }
         return $string;
+    }
+
+    /**
+     * 初始化CURL
+     * @param $url
+     * @param array $options
+     * @return resource
+     */
+    protected function setupRequests($url, array $options = [])
+    {
+        $defaultOptions = [
+            'timeout' => 30,
+            'ssl_ca' => __DIR__ . '/cert/cacert.pem',
+        ];
+        $options = array_merge($defaultOptions, $options);
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_TIMEOUT, $options['timeout']);
+        // 代理
+        if (isset($options['proxy'])) {
+            $proxy = explode(':', $options['proxy']);
+            curl_setopt($ch, CURLOPT_PROXY, $proxy[0]);
+            curl_setopt($ch, CURLOPT_PROXYPORT, $proxy[1]);
+        }
+        // 设置CA
+        if (isset($options['ssl_ca'])) {
+            curl_setopt($ch, CURLOPT_CAINFO, $options['ssl_ca']);
+        }
+        // 校验SSL
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, TRUE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);//严格校验
+
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        // 双向SSL
+        if (isset($options['ssl_cert'])) {
+            curl_setopt($ch, CURLOPT_SSLCERTTYPE, 'PEM');
+            curl_setopt($ch, CURLOPT_SSLCERT, $options['ssl_cert']);
+        }
+        if (isset($options['ssl_key'])) {
+            curl_setopt($ch, CURLOPT_SSLKEYTYPE, 'PEM');
+            curl_setopt($ch, CURLOPT_SSLKEY, $options['ssl_key']);
+        }
+        return $ch;
+    }
+
+    /**
+     * 发送请求
+     * @param $ch
+     * @return mixed
+     * @throws HttpException
+     */
+    protected function sendRequests($ch)
+    {
+        $data = curl_exec($ch);
+        if ($data === false) {
+            $error = curl_error($ch);
+            $errno = curl_errno($ch);
+            curl_close($ch);
+            throw new HttpException(static::getChannel(), 500, "网络请求失败:{$error}", $errno);
+        }
+        curl_close($ch);
+        return $data;
+    }
+
+    /**
+     * GET请求
+     * @param $url
+     * @param array $options
+     * @return mixed
+     * @throws HttpException
+     */
+    protected function getRequests($url, array $options = [])
+    {
+        $ch = $this->setupRequests($url, $options);
+        return $this->sendRequests($ch);
+    }
+
+    /**
+     * POST请求
+     * @param $url
+     * @param $data
+     * @param array $options
+     * @return mixed
+     */
+    protected function postRequests($url, $data, array $options = [])
+    {
+        $ch = $this->setupRequests($url, $options);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        return $this->sendRequests($ch);
     }
 }

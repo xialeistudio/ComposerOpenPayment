@@ -25,6 +25,9 @@ class Data
     const TRADE_TYPE_JSAPI = 'JSAPI'; // 公众号支付
     const TRADE_TYPE_APP = 'APP'; // APP支付
     const TRADE_TYPE_NATIVE = 'NATIVE'; // 扫码支付
+    // 退款资金来源
+    const REFUND_SOURCE_UNSETTLED_FUNDS = 'REFUND_SOURCE_UNSETTLED_FUNDS';//未结算资金，默认使用
+    const REFUND_SOURCE_RECHARGE_FUNDS = 'REFUND_SOURCE_RECHARGE_FUNDS';// 可用余额退款
     /**
      * 请求参数
      * @var array
@@ -47,6 +50,20 @@ class Data
         $this->setAppId($payment->getAppId());
         $this->setMchId($payment->getMchId());
         $this->setSignType(self::SIGN_TYPE_MD5);
+    }
+
+
+    /**
+     * 使用数组初始化
+     * @param Payment $payment
+     * @param array $data
+     * @return Data
+     */
+    public static function initWithArray(Payment $payment, array $data)
+    {
+        $static = new Data($payment);
+        $static->data = $data;
+        return $static;
     }
 
 
@@ -525,17 +542,108 @@ class Data
         return $this->data;
     }
 
+    /**
+     * 设置商户退款单号
+     * @param string $outRefundNo
+     * @return $this
+     */
+    public function setOutRefundNo($outRefundNo)
+    {
+        $this->data['out_refund_no'] = $outRefundNo;
+        return $this;
+    }
 
     /**
-     * 使用数组初始化
-     * @param Payment $payment
-     * @param array $data
-     * @return Data
+     * 获取商户退款单号
+     * @return mixed|null
      */
-    public static function initWithArray(Payment $payment, array $data)
+    public function getOutRefundNo()
     {
-        $static = new Data($payment);
-        $static->data = $data;
-        return $static;
+        return isset($this->data['out_refund_no']) ? $this->data['out_refund_no'] : null;
+    }
+
+    /**
+     * 设置退款金额
+     * @param integer $fee
+     * @return $this
+     */
+    public function setRefundFee($fee)
+    {
+        assert(is_int($fee) && $fee > 0, 'refund_fee为正整数');
+        $this->data['refund_fee'] = $fee;
+        return $this;
+    }
+
+    /**
+     * 获取退款金额
+     * @return mixed|null
+     */
+    public function getRefundFee()
+    {
+        return isset($this->data['refund_fee']) ? $this->data['refund_fee'] : null;
+    }
+
+    /**
+     * 设置退款币种
+     * @param string $type
+     * @return $this
+     */
+    public function setRefundFeeType($type)
+    {
+        $this->data['refund_fee_type'] = $type;
+        return $this;
+    }
+
+    /**
+     * 获取退款类型
+     * @return mixed|null
+     */
+    public function getRefundFeeType()
+    {
+        return isset($this->data['refund_fee_type']) ? $this->data['refund_fee_type'] : null;
+    }
+
+    /**
+     * 操作员 默认商户ID
+     * @param string $userId
+     * @return $this
+     */
+    public function setOpUserId($userId = null)
+    {
+        // 默认商户号
+        if ($userId === null) {
+            $userId = $this->payment->getMchId();
+        }
+        $this->data['op_user_id'] = $userId;
+        return $this;
+    }
+
+    /**
+     * 获取操作员
+     * @return mixed|null
+     */
+    public function getOpUserId()
+    {
+        return isset($this->data['op_user_id']) ? $this->data['op_user_id'] : null;
+    }
+
+    /**
+     * 设置退款金来源
+     * @param string $account
+     * @return $this
+     */
+    public function setRefundAccount($account)
+    {
+        $this->data['refund_account'] = $account;
+        return $this;
+    }
+
+    /**
+     * 获取退款账户
+     * @return mixed|null
+     */
+    public function getRefundAccount()
+    {
+        return isset($this->data['refund_account']) ? $this->data['refund_account'] : null;
     }
 }
