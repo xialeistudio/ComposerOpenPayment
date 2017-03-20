@@ -1066,4 +1066,24 @@ class Data
     {
         return isset($this->data['consume_mch_id']) ? $this->data['consume_mch_id'] : null;
     }
+
+    /**
+     * 裂变红包：红包金额设置方式
+     * @param string $type
+     * @return $this
+     */
+    public function setAmtType($type = 'ALL_RAND')
+    {
+        $this->data['amt_type'] = $type;
+        return $this;
+    }
+
+    /**
+     * 裂变红包：获取红包金额设置方式
+     * @return mixed|null
+     */
+    public function getAmtType()
+    {
+        return isset($this->data['amt_type']) ? $this->data['amt_type'] : null;
+    }
 }

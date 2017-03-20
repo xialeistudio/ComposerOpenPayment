@@ -503,4 +503,34 @@ class Payment extends OpenPayment
             'ssl_cert' => $this->certFile,
         ]);
     }
+
+    /**
+     * 发送裂变红包
+     * @param Data $data
+     * @return array|mixed
+     * @throws InvalidParamException
+     */
+    public function sendGroupRedPack(Data $data)
+    {
+        $data->setAppId(null);
+        $data->setSignType(null);
+        if ($data->getNonceStr() === null) {
+            $data->setNonceStr($this->getNonceStr());
+        }
+        if ($data->getMchBillNo() === null) {
+            throw new InvalidParamException($this->getChannel(), '商户订单号不能为空');
+        }
+        if ($data->getWxAppId() === null) {
+            $data->setWxAppId($this->appId);
+        }
+        if ($data->getAmtType() === null) {
+            $data->setAmtType();
+        }
+        $data->sign();
+        $this->commonValidate($data);
+        return $this->request('/mmpaymkttransfers/sendgroupredpack', $data, [
+            'ssl_key' => $this->keyFile,
+            'ssl_cert' => $this->certFile,
+        ]);
+    }
 }

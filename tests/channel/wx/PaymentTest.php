@@ -147,15 +147,37 @@ class PaymentTest extends PHPUnit_Framework_TestCase
         $data = new Data($this->payment);
         $data
             ->setMchBillNo($orderId)
-            ->setSendName('群友通讯录')
+            ->setSendName('通讯录')
             ->setReOpenid('oHAf2ty7K_mvrpFI3ugvr9Y-ipvA')
             ->setTotalAmount(100)
             ->setTotalNum(1)
             ->setWishing('感谢您参加猜灯谜活动，祝您元宵节快乐！')
-            ->setClientIp('116.22.146.182')
+            ->setClientIp(getenv('LOCAL_ADDR'))
             ->setActName('群友测试红包')
             ->setRemark('猜越多得越多，快来抢！');
         $response = $this->payment->sendRedPack($data);
+        $this->assertArrayHasKey('return_code', $response);
+        $this->assertEquals('SUCCESS', $response['return_code']);
+        print_r($response);
+    }
+
+    public function testSendGroupRedPack()
+    {
+        $orderId = time();
+        $this->payment->setCertFile(__DIR__ . '/apiclient_cert.pem');
+        $this->payment->setKeyFile(__DIR__ . '/apiclient_key.pem');
+        $data = new Data($this->payment);
+        $data
+            ->setMchBillNo($orderId)
+            ->setSendName('通讯录')
+            ->setReOpenid('oHAf2ty7K_mvrpFI3ugvr9Y-ipvA')
+            ->setTotalAmount(300)
+            ->setTotalNum(3)
+            ->setWishing('感谢您参加猜灯谜活动，祝您元宵节快乐！')
+            ->setClientIp(getenv('LOCAL_ADDR'))
+            ->setActName('群友测试红包')
+            ->setRemark('猜越多得越多，快来抢！');
+        $response = $this->payment->sendGroupRedPack($data);
         $this->assertArrayHasKey('return_code', $response);
         $this->assertEquals('SUCCESS', $response['return_code']);
         print_r($response);
