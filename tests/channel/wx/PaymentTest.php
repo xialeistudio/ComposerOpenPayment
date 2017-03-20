@@ -138,4 +138,26 @@ class PaymentTest extends PHPUnit_Framework_TestCase
         $response = $this->payment->getJsApiParameters($prepay['prepay_id']);
         echo $response;
     }
+
+    public function testSendRedPack()
+    {
+        $orderId = time();
+        $this->payment->setCertFile(__DIR__ . '/apiclient_cert.pem');
+        $this->payment->setKeyFile(__DIR__ . '/apiclient_key.pem');
+        $data = new Data($this->payment);
+        $data
+            ->setMchBillNo($orderId)
+            ->setSendName('群友通讯录')
+            ->setReOpenid('oHAf2ty7K_mvrpFI3ugvr9Y-ipvA')
+            ->setTotalAmount(100)
+            ->setTotalNum(1)
+            ->setWishing('感谢您参加猜灯谜活动，祝您元宵节快乐！')
+            ->setClientIp('116.22.146.182')
+            ->setActName('群友测试红包')
+            ->setRemark('猜越多得越多，快来抢！');
+        $response = $this->payment->sendRedPack($data);
+        $this->assertArrayHasKey('return_code', $response);
+        $this->assertEquals('SUCCESS', $response['return_code']);
+        print_r($response);
+    }
 }

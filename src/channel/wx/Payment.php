@@ -116,6 +116,7 @@ class Payment extends OpenPayment
         return $this->appSecret;
     }
 
+
     /**
      * XML转数组
      * @param string $xml
@@ -167,6 +168,9 @@ class Payment extends OpenPayment
             return $data;
         }
         $response = self::xml2array($data);
+        if (!isset($response['sign'])) {
+            return $response;
+        }
         // 签名验证
         $data = Data::initWithArray($this, $response);
         if ($data->getSign() !== $data->sign()) {
@@ -182,17 +186,11 @@ class Payment extends OpenPayment
      */
     private function commonValidate(Data $data)
     {
-        if ($data->getAppId() === null) {
-            throw new InvalidParamException($this->getChannel(), 'AppId未设置');
-        }
         if ($data->getMchId() === null) {
             throw new InvalidParamException($this->getChannel(), 'MchId未设置');
         }
         if ($data->getSign() === null) {
             throw new InvalidParamException($this->getChannel(), 'Sign未设置');
-        }
-        if ($data->getSignType() === null) {
-            throw new InvalidParamException($this->getChannel(), 'SignType未设置');
         }
         if ($data->getNonceStr() === null) {
             throw new InvalidParamException($this->getChannel(), 'NonceStr未设置');
@@ -477,5 +475,32 @@ class Payment extends OpenPayment
         $sign = $pkg->sign(false);
         $data['paySign'] = $sign;
         return json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+
+    /**
+     * 发送普通红包
+     * @param Data $data
+     * @return array|mixed
+     * @throws InvalidParamException
+     */
+    public function sendRedPack(Data $data)
+    {
+        $data->setAppId(null);
+        $data->setSignType(null);
+        if ($data->getNonceStr() === null) {
+            $data->setNonceStr($this->getNonceStr());
+        }
+        if ($data->getMchBillNo() === null) {
+            throw new InvalidParamException($this->getChannel(), '商户订单号不能为空');
+        }
+        if ($data->getWxAppId() === null) {
+            $data->setWxAppId($this->appId);
+        }
+        $data->sign();
+        $this->commonValidate($data);
+        return $this->request('/mmpaymkttransfers/sendredpack', $data, [
+            'ssl_key' => $this->keyFile,
+            'ssl_cert' => $this->certFile,
+        ]);
     }
 }

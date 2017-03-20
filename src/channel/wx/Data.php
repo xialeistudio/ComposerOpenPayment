@@ -210,7 +210,6 @@ class Data
      */
     public function setSignType($signType)
     {
-        assert(in_array($signType, [self::SIGN_TYPE_MD5, self::SIGN_TYPE_HMAC_SHA256]), 'sign_type为MD5或HMAC-SHA256');
         $this->data['sign_type'] = $signType;
         return $this;
     }
@@ -805,5 +804,266 @@ class Data
     public function getPaySign()
     {
         return isset($this->data['paySign']) ? $this->data['paySign'] : null;
+    }
+
+    /**
+     * 红包：商户订单号
+     * @param integer $number 10位不重复数字
+     * @return $this
+     */
+    public function setMchBillNo($number)
+    {
+        $this->data['mch_billno'] = $this->payment->getMchId() . date('Ymd') . $number;
+        return $this;
+    }
+
+    /**
+     * 红包：获取商户订单号
+     * @return mixed|null
+     */
+    public function getMchBillNo()
+    {
+        return isset($this->data['mch_billno']) ? $this->data['mch_billno'] : null;
+    }
+
+    /**
+     * 红包：设置公众号APPID
+     * @param string $appid
+     * @return $this
+     */
+    public function setWxAppId($appid)
+    {
+        $this->data['wxappid'] = $appid;
+        return $this;
+    }
+
+    /**
+     * 红包：获取微信公众号APPID
+     * @return mixed|null
+     */
+    public function getWxAppId()
+    {
+        return isset($this->data['wxappid']) ? $this->data['wxappid'] : null;
+    }
+
+    /**
+     * 红包：设置发送者名称
+     * @param string $name
+     * @return $this
+     */
+    public function setSendName($name)
+    {
+        $this->data['send_name'] = $name;
+        return $this;
+    }
+
+    /**
+     * 红包：获取发送者名称
+     * @return mixed|null
+     */
+    public function getSendName()
+    {
+        return isset($this->data['send_name']) ? $this->data['send_name'] : null;
+    }
+
+    /**
+     * 红包：设置红包接受者OPENID
+     * @param string $openid
+     * @return $this
+     */
+    public function setReOpenid($openid)
+    {
+        $this->data['re_openid'] = $openid;
+        return $this;
+    }
+
+    /**
+     * 红包：获取红包接受者OPENID
+     * @return mixed|null
+     */
+    public function getReOpenid()
+    {
+        return isset($this->data['re_openid']) ? $this->data['re_openid'] : null;
+    }
+
+    /**
+     * 红包：设置付款金额，单位分
+     * @param integer $amount
+     * @return $this
+     */
+    public function setTotalAmount($amount)
+    {
+        $this->data['total_amount'] = $amount;
+        return $this;
+    }
+
+    /**
+     * 红包：获取付款金额
+     * @return mixed|null
+     */
+    public function getTotalAmount()
+    {
+        return isset($this->data['total_amount']) ? $this->data['total_amount'] : null;
+    }
+
+    /**
+     * 红包：设置发放总人数
+     * @param int $num
+     * @return $this
+     */
+    public function setTotalNum($num)
+    {
+        $this->data['total_num'] = $num;
+        return $this;
+    }
+
+    /**
+     * 红包：获取发放总人数
+     * @return mixed|null
+     */
+    public function getTotalNum()
+    {
+        return isset($this->data['total_num']) ? $this->data['total_num'] : null;
+    }
+
+    /**
+     * 红包：设置红包祝福语
+     * @param string $wishing
+     * @return $this
+     */
+    public function setWishing($wishing)
+    {
+        $this->data['wishing'] = $wishing;
+        return $this;
+    }
+
+    /**
+     * 红包：获取红包祝福语
+     * @return mixed|null
+     */
+    public function getWishing()
+    {
+        return isset($this->data['wishing']) ? $this->data['wishing'] : null;
+    }
+
+    /**
+     * 红包：设置调用接口的IP地址
+     * @param string $ip
+     * @return $this
+     */
+    public function setClientIp($ip)
+    {
+        $this->data['client_ip'] = $ip;
+        return $this;
+    }
+
+    /**
+     * 红包：获取调用接口的IP地址
+     * @return mixed|null
+     */
+    public function getClientIp()
+    {
+        return isset($this->data['client_ip']) ? $this->data['client_ip'] : null;
+    }
+
+    /**
+     * 红包：活动名称
+     * @param string $actName
+     * @return $this
+     */
+    public function setActName($actName)
+    {
+        $this->data['act_name'] = $actName;
+        return $this;
+    }
+
+    /**
+     * 红包：获取活动名称
+     * @return mixed|null
+     */
+    public function getActName()
+    {
+        return isset($this->data['act_name']) ? $this->data['act_name'] : null;
+    }
+
+    /**
+     * 红包：设置备注
+     * @param string $remark
+     * @return $this
+     */
+    public function setRemark($remark)
+    {
+        $this->data['remark'] = $remark;
+        return $this;
+    }
+
+    /**
+     * 红包：获取备注
+     * @return mixed|null
+     */
+    public function getRemark()
+    {
+        return isset($this->data['remark']) ? $this->data['remark'] : null;
+    }
+
+    /**
+     * 红包：设置场景ID
+     * @param string $id
+     * @inheritdoc https://pay.weixin.qq.com/wiki/doc/api/tools/cash_coupon.php?chapter=13_4&index=3
+     * @return $this
+     */
+    public function setSceneId($id)
+    {
+        $this->data['scene_id'] = $id;
+        return $this;
+    }
+
+    /**
+     * 红包：获取场景ID
+     * @return mixed|null
+     */
+    public function getSceneId()
+    {
+        return isset($this->data['scene_id']) ? $this->data['scene_id'] : null;
+    }
+
+    /**
+     * 红包：设置设置活动信息
+     * @param string $info
+     * @return $this
+     */
+    public function setRiskInfo($info)
+    {
+        $this->data['risk_info'] = $info;
+        return $this;
+    }
+
+    /**
+     * 红包：获取活动信息
+     * @return mixed|null
+     */
+    public function getRiskInfo()
+    {
+        return isset($this->data['risk_info']) ? $this->data['risk_info'] : null;
+    }
+
+    /**
+     * 设置资金授权商户号
+     * @param string $id
+     * @return $this
+     */
+    public function setConsumeMchId($id)
+    {
+        $this->data['consume_mch_id'] = $id;
+        return $this;
+    }
+
+    /**
+     * 获取资金授权商户号
+     * @return mixed|null
+     */
+    public function getConsumeMchId()
+    {
+        return isset($this->data['consume_mch_id']) ? $this->data['consume_mch_id'] : null;
     }
 }
